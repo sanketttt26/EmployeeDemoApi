@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,13 +11,37 @@ namespace EmployeeAPI.Controllers
 {
     public class EmployeeController : ApiController
     {
-        public IEnumerable<Employee> Get()
+       
+        public HttpResponseMessage Get(string gender="All")
         {
-            EmployeeDBEntities entities = new EmployeeDBEntities();
-            return entities.Employees.ToList();
+            try
+            {
+                using (EmployeeDBEntities entities = new EmployeeDBEntities())
+                {
+                    switch (gender.ToLower())
+                    {
+                        case "all":
+                            return Request.CreateResponse(HttpStatusCode.OK, entities.Employees.ToList());
+                        case "male":
+                            return Request.CreateResponse(HttpStatusCode.OK, entities.Employees.Where(e => e.Gender.ToLower() == gender).ToList());
+                        case "female":
+                            return Request.CreateResponse(HttpStatusCode.OK, entities.Employees.Where(e => e.Gender.ToLower() == gender).ToList());
+                        default:
+                            return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No employee with gender " + gender + " found");
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex);
+            }
+
+           
         }
 
-        public HttpResponseMessage Get(int id) { 
+        [HttpGet]
+        public HttpResponseMessage LoadEmployeeById(int id) { 
             var entities = new EmployeeDBEntities();
             var employee = entities.Employees.FirstOrDefault(e => e.ID == id);
            
