@@ -69,5 +69,33 @@ namespace EmployeeAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex);
             }
         }
+
+        public HttpResponseMessage Put (int id,[FromBody]Employee employee)
+        {
+            try
+            {
+                using (EmployeeDBEntities entities = new EmployeeDBEntities())
+                {
+                    var existingEmployee = entities.Employees.FirstOrDefault(e => e.ID == id);
+                    if (existingEmployee == null)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No such employee exists");
+                    }
+                    existingEmployee.FirstName = employee.FirstName;
+                    existingEmployee.LastName = employee.LastName;
+                    existingEmployee.Gender = employee.Gender;
+                    existingEmployee.Salary = employee.Salary;
+
+                    entities.SaveChanges();
+
+                    return Request.CreateResponse(HttpStatusCode.OK, "Employee details updated succesfully");
+                }
+            }
+            catch(Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex);
+            }
+
+        }
     }
 }
