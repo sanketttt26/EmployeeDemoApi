@@ -48,5 +48,26 @@ namespace EmployeeAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, e);
             }
         }
+
+        public HttpResponseMessage Delete(int id) {
+            try
+            {
+                using (EmployeeDBEntities entities = new EmployeeDBEntities())
+                {
+                    var deletedEmployee = entities.Employees.FirstOrDefault(e => e.ID == id);
+                    if (deletedEmployee == null)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Employee to be deleted not found");
+                    }
+                    entities.Employees.Remove(deletedEmployee);
+                    entities.SaveChanges();
+                    return Request.CreateResponse(HttpStatusCode.OK, "Employee with id = " + deletedEmployee.ID.ToString() + " Deleted successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex);
+            }
+        }
     }
 }
